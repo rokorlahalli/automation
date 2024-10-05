@@ -1,0 +1,56 @@
+[
+    {
+        "Name": "name",
+        "Description": "The Name of the HTTP Listener.",
+        "Type": "string",
+        "Default": "n/a",
+        "Required": "yes",
+        "Support": []
+    },
+    {
+        "Name": "frontend_ip_configuration",
+        "Description": "The frontend ip configuration to use for this HTTP Listener. Possible values are",
+        "Type": "string",
+        "Default": "n/a",
+        "Required": "yes",
+        "Support": [
+            "Public",
+            "Private"
+        ]
+    },
+    {
+        "Name": "port",
+        "Description": "The port used for this HTTP Listener.",
+        "Type": "number",
+        "Default": "n/a",
+        "Required": "yes",
+        "Support": []
+    },
+    {
+        "Name": "protocol",
+        "Description": "The Protocol to use for this HTTP Listener. Possible values are",
+        "Type": "string",
+        "Default": "n/a",
+        "Required": "yes",
+        "Support": [
+            "Http",
+            "Https"
+        ]
+    },
+    {
+        "Name": "host_name",
+        "Description": "The Hostname which should be used for this HTTP Listener. Setting this value changes Listener Type to Multi site.",
+        "Type": "string",
+        "Default": "null",
+        "Required": "no",
+        "Support": []
+    },
+    {
+        "Name": "ssl_certificate_name",
+        "Description": "The name of the associated SSL Certificate which should be used for this HTTP Listener.",
+        "Type": "string",
+        "Default": "null",
+        "Required": "no",
+        "Support": []
+    }
+]

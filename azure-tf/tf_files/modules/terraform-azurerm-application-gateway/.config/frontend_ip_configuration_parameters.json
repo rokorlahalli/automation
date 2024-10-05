@@ -1,0 +1,26 @@
+[
+    {
+        "Name": "public_ip_address_id",
+        "Description": "The ID of a Public IP Address which the Application Gateway should use.",
+        "Type": "string",
+        "Default": "null",
+        "Required": "no",
+        "Support": []
+    },
+    {
+        "Name": "subnet_id",
+        "Description": "The ID of the Subnet in which the Application Gateway should be deployed.",
+        "Type": "string",
+        "Default": "null",
+        "Required": "yes",
+        "Support": []
+    },
+    {
+        "Name": "private_ip_address",
+        "Description": "The Private IP Address to use for the Application Gateway.",
+        "Type": "string",
+        "Default": "null",
+        "Required": "no",
+        "Support": []
+    }
+]
