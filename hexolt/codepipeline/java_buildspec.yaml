@@ -1,0 +1,21 @@
+version: 0.2
+
+variables:
+  PACKAGE_NAME: "s2pay-0.0.1-SNAPSHOT"
+  BUILD_OUTPUT: "target/*.jar"
+
+phases:
+  install:
+    runtime-versions:
+      java: corretto8  # Specify the version of Java you need
+  build:
+    commands:
+      - echo "Changing directory to the project directory..."
+      - cd yourpg
+      - echo "Preparing to build the project..."
+      - mvn clean package -DskipTests
+  post_build:
+    commands:
+      - echo "Build completed."
+      - echo "Uploading JAR file to S3..."
+      - aws s3 cp target/s2pay-0.0.1-SNAPSHOT.jar s3://hexolt-prod-java-artifact/artifact/s2pay-0.0.1-SNAPSHOT.jar
