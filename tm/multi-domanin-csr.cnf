@@ -1,0 +1,31 @@
+bash-5.1$ cat multi-domain-csr.cnf
+[req]
+distinguished_name = req_distinguished_name
+req_extensions = v3_req
+default_keyfile = multisan.key
+prompt = no
+
+[req_distinguished_name]
+C = IN
+ST = Maharashtra
+L = Thane
+O = Reliance Retail Insurance Broking Limited
+OU = Insurance
+CN = jioinsurancebroking.com
+
+[v3_req]
+keyUsage = keyEncipherment, dataEncipherment
+extendedKeyUsage = serverAuth
+subjectAltName = @alt_names
+
+[alt_names]
+DNS.1 = sales.jioinsurancebroking.com
+DNS.2 = admin.jioinsurancebroking.com
+DNS.3 = pro.sales.jioinsurancebroking.com
+DNS.4 = app.jioinsurancebroking.com
+DNS.5 = cms.jioinsurancebroking.com
+DNS.6 = masters.jioinsurancebroking.com
+DNS.7 = notifications.jioinsurancebroking.com
+DNS.8 = reach.jioinsurancebroking.com
+DNS.9 = grafana.jioinsurancebroking.com
+DNS.10 = metabase.jioinsurancebroking.com
