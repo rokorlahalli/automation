@@ -1,0 +1,14 @@
+## Check ping pong response using this inventory
+## Login into each server to save the details in known hosts file
+## Make sure u have the pem file which will be use for login
+
+
+
+[primary]
+54.224.27.233  ansible_connection=ssh  ansible_ssh_port=22   ansible_user=ubuntu     ansible_ssh_private_key_file=/home/rohit/rohit-ansible.pem
+
+[secondary]
+35.171.85.157  ansible_connection=ssh  ansible_ssh_port=22   ansible_user=ubuntu     ansible_ssh_private_key_file=/home/rohit/rohit-ansible.pem
+
+[arbiter]
+54.80.169.165 ansible_connection=ssh  ansible_ssh_port=22   ansible_user=ubuntu     ansible_ssh_private_key_file=/home/rohit/rohit-ansible.pem

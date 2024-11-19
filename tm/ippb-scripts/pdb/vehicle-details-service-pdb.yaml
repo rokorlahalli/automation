@@ -1,0 +1,10 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: vehicle-details-service
+  namespace: ippb
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: vehicle-details-service

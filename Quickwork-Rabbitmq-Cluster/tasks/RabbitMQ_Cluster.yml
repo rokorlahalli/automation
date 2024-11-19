@@ -1,0 +1,131 @@
+---
+- hosts: Cluster_RabbitMQ
+  vars_files:
+    - ../vars/variables.yml
+  become: yes
+  become_user: root
+  become_method: sudo
+ 
+  tasks:
+    - name: Update all packages
+      apt:
+        name: "*"
+        state: latest
+        update_cache: yes
+        force_apt_get: true
+
+    - name: Installing RabbitMQ server
+      apt: 
+        name: rabbitmq-server={{ version_to_install }}
+        state: present
+        update_cache: yes
+         - name: Download RabbitMQ package.
+        get_url:
+        url: "{{ rabbitmq_deb_url }}"
+        dest: "/tmp/{{ rabbitmq_deb }}"
+    - name: Install required packages
+      apt:
+        name:
+           - rabbitmq-server
+           - python3-pip  # RabbitMQ management plugin requires Python3
+        state: present
+    - name: Add RabbitMQ GPG key
+      apt_key:
+        url: https://www.rabbitmq.com/rabbitmq-release-signing-key.asc
+        state: present
+
+        #- name: Add RabbitMQ APT repository
+        #apt_repository:
+        #repo: deb http://www.rabbitmq.com/debian/ bionic main
+        #state: present
+
+    - name: Install RabbitMQ Server
+      apt:
+        name: rabbitmq-server
+        state: present
+
+
+
+        #- name: Download Rabbitmq file
+      #get_url:
+              #url: "https://packagecloud.io/rabbitmq/rabbitmq-server/packages/ubuntu/jammy/rabbitmq-server_3.10.25-1_all.deb"
+        #dest: "/home/ubuntu/rabbitmq-server_3.10.25-1_all.deb"
+        #- name: Install the Rabbitmq
+      #apt:
+              #deb: "/home/ubuntu/rabbitmq-server_3.10.25-1_all.deb"
+
+        #- name: Ensure RabbitMQ is installed.
+        #apt:
+        #deb: "/tmp/{{ rabbitmq_deb }}"
+        #state: present
+
+    - name: Make sure a rabbitmq-server is running
+      systemd: state=started name=rabbitmq-server
+
+    - name: Enable servicer rabbitmq-server 
+      systemd:
+        name:  rabbitmq-server
+        enabled: yes
+        masked: no
+
+    - name: Enable RabbitMQ plugins
+      rabbitmq_plugin:
+        names: rabbitmq_management
+        state: enabled
+
+    - name: Restart RabbitMQ
+      service: name=rabbitmq-server state=restarted 
+
+    - name: rabbitmq_clustering | copy erlang cookie
+      template: src=../templates/erlang.cookie.j2 dest=/var/lib/rabbitmq/.erlang.cookie owner=rabbitmq group=rabbitmq mode=0400 
+
+    - name: rabbitmq_clustering | restarting rabbitmq-server
+      service: name=rabbitmq-server state=restarted 
+
+#    - name: stop rabbitmq app
+#      command: "sudo rabbitmqctl stop_app"
+#      when: ansible_hostname  != rabbitmq_master
+#    - name: rabbitmq_clustering | joining rabbitmq cluster
+#      command: "rabbitmqctl join_cluster 'rabbit@{{ rabbitmq_master }}'"
+#      when: ansible_hostname  != rabbitmq_master
+#    - name: start rabbitmq app
+#      command: "sudo rabbitmqctl start_app"
+#      when: ansible_hostname  != rabbitmq_master
+ ### 
+#    - name: Stop RabbitMQ app to join the cluster
+#      shell: |
+#        sudo rabbitmqctl stop_app
+#      tags:
+#        - stop_app
+#      when: ansible_hostname  != "s1"
+
+
+
+
+
+
+
+
+    - name: stop rabbitmq app
+      command: "sudo rabbitmqctl stop_app"
+      when: ansible_hostname  != rabbitmq_master
+
+    - name: rabbitmq_clustering | joining rabbitmq cluster
+      command: "rabbitmqctl join_cluster 'rabbit@{{ rabbitmq_master }}'"
+      when: ansible_hostname  != rabbitmq_master
+
+    - name: start rabbitmq app
+      command: "sudo rabbitmqctl start_app"
+      when: ansible_hostname  != rabbitmq_master
+
+    - name: Create a new user
+      shell: rabbitmqctl add_user {{ user_name }} {{ user_password }}
+      when: ansible_hostname  == rabbitmq_master
+
+    - name: Set user as an administrator
+      shell: rabbitmqctl set_user_tags {{ user_name }} administrator
+      when: ansible_hostname  == rabbitmq_master      
+
+    - name: Grant user permission to modify, write, and read all vhosts
+      shell: rabbitmqctl set_permissions -p / {{ user_name }} ".*" ".*" ".*"
+      when: ansible_hostname  == rabbitmq_master

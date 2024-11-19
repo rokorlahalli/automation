@@ -1,0 +1,14 @@
+---
+#rabbitmq version#
+version_to_install: 3.12.8
+# hostname of master node
+#172.31.15.176
+rabbitmq_master: ip-10-125-50-210
+erlang_cookie: OQYDPQLNQJQPAVPAUDWH
+# create new user and passord with administrator accesss
+user_name: admin
+user_password: a3V6wsZ11B8BSf
+rabbitmq_version: "3.12.8"
+#rabbitmq_deb: "rabbitmq-server_{{ rabbitmq_version }}-1_all.deb"
+#rabbitmq_deb_url: "http://ftp.cn.debian.org/debian/pool/main/r/rabbitmq-server/{{ rabbitmq_deb }}"
+#rabbitmq_deb_url: "https://packagecloud.io/rabbitmq/rabbitmq-server/packages/{{ ansible_distribution | lower }}/{{ ansible_distribution_release }}/{{ rabbitmq_deb }}"

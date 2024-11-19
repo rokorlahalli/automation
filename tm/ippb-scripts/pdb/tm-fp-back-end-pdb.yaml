@@ -1,0 +1,10 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: tm-fp-back-end
+  namespace: ippb
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: tm-fp-back-end

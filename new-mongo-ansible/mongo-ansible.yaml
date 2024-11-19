@@ -1,0 +1,304 @@
+---
+- hosts: all
+  become: yes
+  become_user: root
+  vars_files:
+    - ../vars/variables-b2b.yml
+  tasks:
+    - name: Install gnupg
+      apt:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - gnupg
+        - curl
+    - name: Downloading libssl1.1
+      ansible.builtin.get_url:
+        url: http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.0g-2ubuntu4_amd64.deb
+        dest: /home/ubuntu/
+    - name: installing libssl1.1
+      shell: dpkg -i /home/ubuntu/libssl1.1_1.1.0g-2ubuntu4_amd64.deb
+        #- name: Download MongoDB GPG key
+        #  shell: "curl -fsSL https://pgp.mongodb.com/server-4.4.asc | sudo gpg --dearmor -o /usr/share/keyrings/mongodb-server-4.4.gpg"
+    - name: Create the mongo-key file
+      file:
+        path: /etc/apt/sources.list.d/mongodb-org-4.4.list
+        state: touch
+    - name: Add MongoDB repository line to sources.list
+      lineinfile:
+        path: /etc/apt/sources.list.d/mongodb-org-4.4.list
+        line: "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-4.4.gpg ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/4.4 multiverse"
+    - name: Update package cache
+      apt:
+        update_cache: yes
+    - name: Install MongoDB
+      apt:
+        name: mongodb-org
+        state: present
+        update_cache: yes
+    - name: Create the mongodb directory
+      file:
+        path: /etc/mongodb
+        state: directory
+    - name: Create the mongo-key file
+      file:
+        path: /etc/mongodb/mongo-key
+        state: touch
+
+- hosts: 127.0.0.1
+  #become: yes
+  connection: local
+  tasks:
+  - name: Generate the key file
+    shell: openssl rand -base64 741 > /home/rohit/mongo-key
+
+- hosts: all
+  become: yes
+  become_user: root
+  tasks:
+  - name: copy key from local to server
+    copy:
+      src: /home/rohit/mongo-key
+      dest: /home/ubuntu/
+      owner: ubuntu
+      group: ubuntu
+      mode: 0644
+
+
+- hosts: primary
+  become: yes
+  become_user: root
+  vars_files:
+    - ../vars/variables-b2b.yml
+  tasks:
+    - name: Copy the key file from /home/ubuntu to /etc/mongodb.
+      shell: "cp /home/ubuntu/mongo-key /etc/mongodb/mongo-key"
+    - name: Change ownership of the /home/ubuntu/mongo-key file
+      file:
+        path: /etc/mongodb/mongo-key
+        owner: mongodb
+        group: mongodb
+    - name: Change permissions to 400
+      file:
+        path: /etc/mongodb/mongo-key
+        mode: "0400"
+
+- hosts: secondary
+  become: yes
+  become_user: root
+  vars_files:
+    - ../vars/variables-b2b.yml
+  tasks:
+    - name: Copy the key file from /home/ubuntu to /etc/mongodb.
+      shell: "cp /home/ubuntu/mongo-key /etc/mongodb/mongo-key"
+    - name: Change ownership of the /home/ubuntu/mongo-key file 
+      file:
+        path: /etc/mongodb/mongo-key
+        owner: mongodb
+        group: mongodb
+    - name: Change permissions to 400
+      file:
+        path: /etc/mongodb/mongo-key
+        mode: "0400"
+
+- hosts: arbiter
+  become: yes
+  become_user: root
+  vars_files:
+    - ../vars/variables-b2b.yml
+  tasks:
+    - name: Copy the key file from /home/ubuntu to /etc/mongodb.
+      shell: "cp /home/ubuntu/mongo-key /etc/mongodb/mongo-key"
+    - name: Change ownership of the /home/ubuntu/mongo-key file 
+      file:
+        path: /etc/mongodb/mongo-key
+        owner: mongodb
+        group: mongodb
+    - name: Change permissions to 400
+      file:
+        path: /etc/mongodb/mongo-key
+        mode: "0400"
+
+- hosts: primary
+  become: yes
+  become_user: root
+  vars_files:
+    - ../vars/variables-b2b.yml
+  tasks:
+    - name: replace the bindIP in mongod.conf file
+      replace:
+        path: /etc/mongod.conf
+        regexp: 'bindIp: 127.0.0.1'
+        replace: 'bindIp: {{ primary_IP }}'
+    - name: replace the port in mongod.conf file
+      replace:
+        path: /etc/mongod.conf
+        regexp: 'port: 27017'
+        replace: 'port: {{ b2b_dbPort }}'
+    - name: replace the dbPath in mongod.conf file
+      replace:
+        path: /etc/mongod.conf
+        regexp: 'dbPath: /var/lib/mongodb'
+        replace: 'dbPath: {{ dbpath }}'
+    - name: Set ownership of the directory recursively
+      file:
+        path: '{{ dbpath }}'
+        state: directory
+        recurse: yes
+        owner: mongodb
+        group: mongodb
+
+- hosts: secondary
+  become: yes
+  become_user: root
+  vars_files:
+    - ../vars/variables-b2b.yml
+  tasks:
+    - name: replace the bindIP in mongod.conf file
+      replace:
+        path: /etc/mongod.conf
+        regexp: 'bindIp: 127.0.0.1'
+        replace: 'bindIp: {{ secondary_IP }}'
+    - name: replace the port in mongod.conf file
+      replace:
+        path: /etc/mongod.conf
+        regexp: 'port: 27017'
+        replace: 'port: {{ b2b_dbPort }}'
+    - name: replace the dbPath in mongod.conf file
+      replace:
+        path: /etc/mongod.conf
+        regexp: 'dbPath: /var/lib/mongodb'
+        replace: 'dbPath: {{ dbpath }}'
+    - name: Set ownership of the directory recursively
+      file:
+        path: '{{ dbpath }}'
+        state: directory
+        recurse: yes
+        owner: mongodb
+        group: mongodb
+
+- hosts: arbiter
+  become: yes
+  become_user: root
+  vars_files:
+    - ../vars/variables-b2b.yml
+  tasks:
+    - name: replace the bindIP in mongod.conf file
+      replace:
+        path: /etc/mongod.conf
+        regexp: 'bindIp: 127.0.0.1'
+        replace: 'bindIp: {{ arbiter_IP }}'
+    - name: replace the port in mongod.conf file
+      replace:
+        path: /etc/mongod.conf
+        regexp: 'port: 27017'
+        replace: 'port: {{ b2b_dbPort }}'
+    - name: replace the dbPath in mongod.conf file
+      replace:
+        path: /etc/mongod.conf
+        regexp: 'dbPath: /var/lib/mongodb'
+        replace: 'dbPath: {{ dbpath }}'
+    - name: Set ownership of the directory recursively
+      file:
+        path: '{{ dbpath }}'
+        state: directory
+        recurse: yes
+        owner: mongodb
+        group: mongodb
+
+- hosts: primary
+  become: yes
+  vars_files:
+    - ../vars/variables-b2b.yml
+  tasks:
+    - name: Install python3-pymongo
+      ansible.builtin.package:
+        name: python3-pymongo
+        state: present
+    - name: Restart mongod service
+      ansible.builtin.service:
+        name: mongod
+        state: restarted
+    - name: Create admin User
+      shell:
+        cmd: 'mongo --host "{{ primary_IP }}" --port "{{ b2b_dbPort }}"'
+        executable: /bin/bash
+        stdin: |
+          use admin;
+          db.createUser(
+          {
+              user: "{{ admin_user }}",
+              pwd: "{{ admin_pass }}",
+              roles: [ "root" ]
+          });
+          exit;
+          #- mongodb_user:
+          #    login_host: "{{ primary_IP }}"
+          #    login_port: "{{ b2b_dbPort }}"
+          #    database: admin 
+          #    name: "{{ admin_user }}"
+          #    password: "{{ admin_pass }}"
+          #    state: present
+          #    roles: root
+
+- hosts: all
+  become: yes
+  become_user: root
+  vars_files:
+    - ../vars/variables-b2b.yml
+  tasks:
+    - name: enabling securiy in mongod.conf file
+      lineinfile:
+        path: /etc/mongod.conf
+        state: present
+        line: "{{ item }}"
+      with_items:
+      - 'security:'
+      - '  authorization: "enabled"'
+      - '  keyFile: /etc/mongodb/mongo-key'
+      - 'replication:'
+      - '  replSetName: "{{ replicasetname }}"'
+    - name: Restart mongod service
+      ansible.builtin.service:
+        name: mongod
+        state: restarted
+
+          #- hosts: primary
+          #  become: yes
+          #  become_user: root
+          #  vars_files:
+          #    - ../vars/variables-b2b.yml
+          #  tasks:
+          #    - name: Initialize Replica Set
+          #      shell: |
+          #        'mongo --host "{{ primary_IP }}" --port "{{ b2b_dbPort }}" --username "{{ admin_user }}" --password "{{ admin_pass }}" --authenticationDatabase admin --eval "rs.initiate({_id: \'{{ replicasetname }}\', members: [{_id: 0, host: \'{{ primary_IP }}:{{ b2b_dbPort }}\', priority: 100}, {_id: 1, host: \'{{ secondary_IP }}:{{ b2b_dbPort }}\', priority: 50}, {_id: 2, host: \'{{ arbiter_IP }}:{{ b2b_dbPort }}\', arbiterOnly: true}]})"'
+          #      ignore_errors: true
+          #
+          #    - name: Wait for Replica Set to Initialize
+          #      shell: |
+          #        until mongo --host {{ mongo_primary }}:{{ mongo_port }} --eval "rs.status()" | grep -q '\"ok\" : 1'; do sleep 5; done
+          #      retries: 30
+          #      delay: 10
+          #
+          #    - name: Print Replica Set Status
+          #      shell: |
+          #        mongo --host "{{ primary_IP }}" --port "{{ b2b_dbPort }}" --username "{{ admin_user }}" --password "{{ admin_pass }}" --authenticationDatabase admin --eval "rs.status()"
+
+
+    ##############################################333
+    #- name: Init Replicaset
+    #  shell: 
+    #    cmd: 'mongo --host "{{ primary_IP }}" --port "{{ b2b_dbPort }}" -u "{{ admin_user }}" -p "{{ admin_pass }}" --authenticationDatabase admin'
+    #    executable: /bin/bash
+    #    stdin: |
+    #      use admin;
+    #      rs.initiate();
+    #      rs.add( { host: '{{ secondary_IP }}:{{ b2b_dbPort }}'} );
+    #      rs.addArb('{{ mongo_host }}:{{ mongo_port }}');
+    #        #rs.addArb( { host: '{{ arbiter_IP }}:{{ b2b_dbPort }}'} );
+    #      cfg = rs.conf();
+    #      cfg.members[0].priority = 100;
+    #      cfg.members[1].priority = 50;
+    #      cfg.members[2].priority = 0;
+    #      rs.reconfig(cfg);
+    #        #rs.addArb('{{ arbiter_IP }}:{{ b2b_dbPort }}')

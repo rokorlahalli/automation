@@ -1,0 +1,10 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: integrations-framework
+  namespace: ippb
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: integrations-framework

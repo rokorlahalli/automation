@@ -1,0 +1,3 @@
+[Cluster_RabbitMQ]
+10.125.50.210 ansible_connection=ssh ansible_ssh_port=22   ansible_user=ubuntu  ansible_ssh_private_key_file=/home/rohit/qw-prod.pem
+10.125.60.169 ansible_connection=ssh ansible_ssh_port=22    ansible_user=ubuntu  ansible_ssh_private_key_file=/home/rohit/qw-prod.pem
