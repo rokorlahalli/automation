@@ -1,0 +1,75 @@
+jioprod@rohit-ThinkPad-E15-Gen-2:~$ cat digit-mongo-cronjob.yaml
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: jio-scripts-digit-report
+  namespace: mintpro
+spec:
+  schedule: "30 17 * * *"
+  failedJobsHistoryLimit: 1
+  successfulJobsHistoryLimit: 1
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: jio-scripts-sa
+          containers:
+          - name: jio-scripts        
+            #image: public.ecr.aws/l5x1y8h7/mongo:latest          
+            image: public.ecr.aws/c1j5t5w1/node-npm-mongo:latest    
+            command: ["sh", "-c", "/jio-prod/scripts/jio-digit-report/generate-digit-daily-report.sh"]
+            volumeMounts:
+            - name: jio-scripts
+              mountPath: /jio-prod/scripts/
+            - name: reliancepem
+              mountPath: /jio-prod/scripts/jio-digit-report/Reliance.pem
+              subPath: Reliance.pem
+              readOnly: true
+          restartPolicy: OnFailure
+          volumes:
+          - name: jio-scripts
+            persistentVolumeClaim:
+              claimName: jio-prod-script-job-pvc
+          - name: reliancepem
+            configMap:
+              name: reliancepem         
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: jio-scripts-rolebinding
+  namespace: mintpro
+subjects:
+- kind: ServiceAccount
+  name: jio-scripts-sa
+  namespace: mintpro
+roleRef:
+  kind: Role
+  name: jio-scripts-role
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: jio-scripts-role
+  namespace: mintpro
+rules:
+- apiGroups:
+  - ""
+  - "extensions"
+  - "apps"
+  resources:
+  - "pods"
+  - "configmaps"
+  verbs:
+  - "get"
+  - "list"
+  - "watch"
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: jio-scripts-sa
+  namespace: mintpro
+---
