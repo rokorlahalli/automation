@@ -8,23 +8,20 @@ A collection of **automation + infrastructure code** (Terraform, Python, and rel
 
 ## What you’ll find in this repo
 
-From the folder structure, this repository includes projects such as: :contentReference[oaicite:3]{index=3}
-
+From the folder structure, this repository includes projects such as: 
 - **Terraform (IaC)**
-  - `azure-tf/tf_files` — Terraform files for Azure resources (IaC templates). :contentReference[oaicite:4]{index=4}
-  - `nailbiter-nodegroup-tf` — Terraform for node group provisioning (likely Kubernetes/EKS-style node groups). :contentReference[oaicite:5]{index=5}
+  - `azure-tf/tf_files` — Terraform files for Azure resources (IaC templates).
+  - `nailbiter-nodegroup-tf` — Terraform for node group provisioning (likely Kubernetes/EKS-style node groups). 
 
 - **Cluster / Platform Automation**
-  - `Quickwork-Rabbitmq-Cluster` — Setup/automation related to a RabbitMQ cluster. :contentReference[oaicite:6]{index=6}
-  - `new-mongo-ansible` — Ansible automation for MongoDB (installation/config management). :contentReference[oaicite:7]{index=7}
-
+  - `Quickwork-Rabbitmq-Cluster` — Setup/automation related to a RabbitMQ cluster.
+  - `new-mongo-ansible` — Ansible automation for MongoDB (installation/config management). 
 - **AWS / Serverless Utilities**
-  - `jenkins-notification-lambda` — AWS Lambda utility for Jenkins notifications (event-driven alerts). :contentReference[oaicite:8]{index=8}
+  - `jenkins-notification-lambda` — AWS Lambda utility for Jenkins notifications (event-driven alerts). 
 
 - **Ops / Tooling**
-  - `metabase` — Assets/config related to Metabase deployment/ops. :contentReference[oaicite:9]{index=9}
-  - `hexolt`, `tm` — Additional automation/tooling folders (purpose depends on internal structure). :contentReference[oaicite:10]{index=10}
-
+  - `metabase` — Assets/config related to Metabase deployment/ops. 
+  - `hexolt`, `tm` — Additional automation/tooling folders (purpose depends on internal structure).
 ---
 
 ## Repo structure
