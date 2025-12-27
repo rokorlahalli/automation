@@ -2,7 +2,7 @@
 
 A collection of **automation + infrastructure code** (Terraform, Python, and related tooling) for multiple real-world use cases. :contentReference[oaicite:1]{index=1}
 
-> 📌 Note: This repo is organized as a set of independent mini-projects (folders). Each folder typically represents a specific automation use case or infrastructure component. :contentReference[oaicite:2]{index=2}
+> 📌 Note: This repo is organized as a set of independent projects (folders). Each folder typically represents a specific automation use case or infrastructure component.
 
 ---
 
